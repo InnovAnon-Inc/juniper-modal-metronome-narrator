@@ -4,4 +4,4 @@ set -euxo nounset -o pipefail
 (( ! $# ))
 [[ -n ${VIRTUAL_ENV:-} ]] ||
 . ~/venv/bin/activate
-python app.py
+python -m juniper_chimes_narrator.app

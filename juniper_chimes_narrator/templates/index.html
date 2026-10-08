@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Band Director Narrator | Juniper Chimes</title>
+    <style>
+        body {
+            background-color: #0d1117;
+            color: #58a6ff;
+            font-family: 'Courier New', Courier, monospace;
+            text-align: center;
+            padding: 30px;
+            margin: 0;
+        }
+        .container {
+            max-width: 680px;
+            margin: 0 auto;
+            border: 2px solid #30363d;
+            border-radius: 8px;
+            background: #161b22;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+        h1 {
+            color: #79c0ff;
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+        .subtitle {
+            color: #8b949e;
+            font-size: 0.95rem;
+            margin-bottom: 25px;
+        }
+        .card {
+            border: 1px solid #30363d;
+            background: #0d1117;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        .label {
+            color: #8b949e;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .value {
+            color: #f0f6fc;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-top: 4px;
+        }
+        .highlight {
+            color: #79c0ff;
+        }
+        .accent {
+            color: #d2a8ff;
+        }
+        audio {
+            width: 100%;
+            margin-top: 15px;
+        }
+        .bpm-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            background-color: #238636;
+            border-radius: 50%;
+            margin-left: 8px;
+            animation: pulse 0.5s infinite alternate;
+        }
+        @keyframes pulse {
+            from { opacity: 0.3; transform: scale(0.8); }
+            to { opacity: 1.0; transform: scale(1.2); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>BAND DIRECTOR NARRATOR</h1>
+        <div class="subtitle">
+            Tuning System: <span id="lbl-edo" class="highlight">31-EDO</span> |
+            Cadence: 120 BPM (8th notes) <span class="bpm-indicator"></span>
+        </div>
+
+        <div class="card">
+            <div class="label">Status</div>
+            <div id="lbl-status" class="value highlight">Connecting to API...</div>
+        </div>
+
+        <div class="card">
+            <div class="label">Current Polychord (Every 1 min)</div>
+            <div id="lbl-chord" class="value accent">--</div>
+        </div>
+
+        <div class="card">
+            <div class="label">Key Transition (Every 7 min)</div>
+            <div><strong>Now Beginning:</strong> <span id="lbl-curr-key" class="value">--</span></div>
+            <div style="margin-top: 6px;"><strong>Completed:</strong> <span id="lbl-prev-key" style="color: #8b949e;">--</span></div>
+        </div>
+
+        <div class="card">
+            <div class="label">Spoken Band Director Announcement</div>
+            <div id="lbl-script" class="value" style="font-style: italic; color: #a5d6ff;">"--"</div>
+            <audio id="audioPlayer" controls autoplay></audio>
+        </div>
+    </div>
+
+    <script>
+        let lastAudioId = -1;
+        const player = document.getElementById('audioPlayer');
+
+        async function updateState() {
+            try {
+                const res = await fetch('/api/state');
+                const data = await res.json();
+
+                document.getElementById('lbl-status').innerText = data.current_action;
+                document.getElementById('lbl-chord').innerText = data.polychord || '--';
+                document.getElementById('lbl-curr-key').innerText = data.current_key || '--';
+                document.getElementById('lbl-prev-key').innerText = data.previous_key || '--';
+                document.getElementById('lbl-script').innerText = data.last_narration ? `"${data.last_narration}"` : '--';
+                document.getElementById('lbl-edo').innerText = data.edo_system || '31-EDO';
+
+                if (data.audio_file && data.audio_id !== lastAudioId) {
+                    lastAudioId = data.audio_id;
+                    player.src = '/audio/' + data.audio_file;
+                    player.play().catch(e => console.log('Autoplay deferred by browser:', e));
+                }
+            } catch (err) {
+                document.getElementById('lbl-status').innerText = 'Disconnected from Server';
+            }
+        }
+
+        setInterval(updateState, 1000);
+        updateState();
+    </script>
+</body>
+</html>
