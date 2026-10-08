@@ -270,7 +270,7 @@ class FlaskChimesNarrator:
 # FLASK APPLICATION SETUP
 # ==========================================
 app = Flask(__name__)
-narrator = FlaskChimesNarrator(ws_url=WS_URL, speech_rate=140)
+narrator = FlaskChimesNarrator(ws_url=WS_URL, speech_rate=120)
 
 HTML_TEMPLATE = """
 <!DOCTYPE html>
