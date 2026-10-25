@@ -8,7 +8,7 @@ Flask Application Server for the Band Director Narrator.
 import os
 import threading
 from flask import Flask, render_template, jsonify, send_from_directory
-from juniper_chimes_narrator.narrator import BandDirectorNarrator, CACHE_DIR
+from .narrator import BandDirectorNarrator, CACHE_DIR
 
 HTTP_PORT = int(os.environ.get("HTTP_PORT", 5012))
 WS_URL = os.environ.get("WS_URL", "ws://127.0.0.1:65432")
